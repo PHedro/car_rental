@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Car
   SALOON = 0
   SUV = 1
@@ -19,9 +21,7 @@ class Rental
     @car = car
     @days_rented = days_rented
 
-    if !(@days_rented > 0)
-      raise 'Error: days_rented invalid'
-    end
+    raise 'Error: days_rented invalid' if @days_rented <= 0
   end
 end
 
@@ -40,41 +40,31 @@ class Driver
   def statement
     total = 0
     bonus_points = 0
-    result = "Car rental record for #{@name.to_s}\n"
-    for r in @rentals
+    result = "Car rental record for #{@name}\n"
+    @rentals.each do |r|
       this_amount = 0
       case r.car.style
       when Car::SUV
         this_amount += r.days_rented * 30
       when Car::HATCHBACK
         this_amount += 15
-        if r.days_rented > 3
-          this_amount += (r.days_rented - 3) * 15
-        end
+        this_amount += (r.days_rented - 3) * 15 if r.days_rented > 3
       when Car::SALOON
         this_amount += 20
-        if r.days_rented > 2
-          this_amount += (r.days_rented - 2) * 15
-        end
-      else
-
+        this_amount += (r.days_rented - 2) * 15 if r.days_rented > 2
       end
 
-      if this_amount < 0
-        bonus_points -= 10
-      end
+      bonus_points -= 10 if this_amount.negative?
 
-      bonus_points = bonus_points + 1
-      if r.car.style == Car::SUV && r.days_rented > 1
-        bonus_points = bonus_points + 1
-      end
+      bonus_points += 1
+      bonus_points += 1 if r.car.style == Car::SUV && r.days_rented > 1
 
-      result += r.car.title.to_s + "," + this_amount.to_s + "\n"
+      result += r.car.title.to_s + ',' + this_amount.to_s + "\n"
       total += this_amount
     end
 
-    result += "Amount owed is €" + "#{total.to_s}" + "\n"
-    result += "Earned bonus points: " + bonus_points.to_s
+    result += 'Amount owed is €' + total.to_s + "\n"
+    result += 'Earned bonus points: ' + bonus_points.to_s
     result
   end
 end
